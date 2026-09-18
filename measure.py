@@ -310,52 +310,48 @@ def figure_areas(masks, path="figures/areas.png"):
     return path
 
 
-def figure_vestibule(masks, envelope, path="figures/vestibule.png"):
-    """The one disputed input, drawn both ways."""
+def figure_split(masks, envelope, path="figures/split.png"):
+    """Private space each side, and the shared remainder that gets halved."""
     base = Image.open(PLAN).convert("RGB")
     W, H = base.size
     sf = areas(masks)
     east = sum(sf[k] for k in EAST_KEYS)
+    west = sum(sf[k] for k in WEST_KEYS)
+    shared = PUBLISHED_SF - east - west
+    share = (east + shared / 2) / PUBLISHED_SF
 
-    def share(east_sf, west_sf):
-        return (east_sf + (PUBLISHED_SF - east_sf - west_sf) / 2) / PUBLISHED_SF
-
-    without = ["west_room", "west_closet", "west_bath"]
-    panels = [
-        ("Vestibule counted as shared circulation", without,
-         share(east, sum(sf[k] for k in without))),
-        ("Vestibule counted as west private space", WEST_KEYS,
-         share(east, sum(sf[k] for k in WEST_KEYS))),
-    ]
-    LBL, MX, MY, GAP = 96, 26, 92, 26
-    out = Image.new("RGB", (MX * 2 + W * 2 + GAP, MY + H + LBL + GAP), (255, 255, 255))
-    dr = ImageDraw.Draw(out)
-    f_t, f_h, f_s, f_n, f_ss = _font(30, True), _font(20, True), _font(15), _font(22, True), _font(14)
-    dr.text((MX, 16), "The one input the two calculations disagree on", font=f_t, fill=(18, 18, 18))
-    dr.text((MX + 2, 54),
-            "Blue = east private \u00b7 Amber = west private \u00b7 Grey stripes = shared, divided evenly. "
-            "Identical method in both panels; only the vestibule moves.",
-            font=f_ss, fill=(115, 115, 115))
+    S, MX, TOP, BOT = 2, 26, 92, 104
+    img = base.copy()
+    claimed = np.zeros((H, W), bool)
+    for k in WEST_KEYS:
+        img = _tint(img, masks[k], WEST_HUE, 0.45)
+        claimed |= masks[k]
+    for k in EAST_KEYS:
+        img = _tint(img, masks[k], EAST_HUE, 0.45)
+        claimed |= masks[k]
     yy, xx = np.mgrid[0:H, 0:W]
-    stripe = ((xx + yy) % 14) < 4
-    for i, (title, west_keys, sh) in enumerate(panels):
-        ox, oy = MX + i * (W + GAP), MY
-        img = base.copy()
-        claimed = np.zeros((H, W), bool)
-        for k in west_keys:
-            img = _tint(img, masks[k], WEST_HUE, 0.45)
-            claimed |= masks[k]
-        for k in EAST_KEYS:
-            img = _tint(img, masks[k], EAST_HUE, 0.45)
-            claimed |= masks[k]
-        img = _tint(img, envelope & ~claimed & stripe, (120, 120, 120), 0.5)
-        out.paste(img, (ox, oy))
-        dr.rectangle([ox, oy, ox + W, oy + H], outline=(215, 215, 215), width=1)
-        ly = oy + H + 8
-        dr.text((ox, ly), title, font=f_h, fill=(20, 20, 20))
-        dr.text((ox, ly + 28), f"east share {sh * 100:.2f}%", font=f_n, fill=EAST_HUE)
-        dr.text((ox + 190, ly + 31),
-                f"west private {sum(sf[k] for k in west_keys):.0f} sf", font=f_s, fill=(95, 95, 95))
+    img = _tint(img, envelope & ~claimed & (((xx + yy) % 14) < 4), (120, 120, 120), 0.5)
+
+    out = Image.new("RGB", (W * S + MX * 2, H * S + TOP + BOT), (255, 255, 255))
+    out.paste(img.resize((W * S, H * S), Image.LANCZOS), (MX, TOP))
+    dr = ImageDraw.Draw(out)
+    f_t, f_n, f_s, f_ss = _font(30, True), _font(24, True), _font(16), _font(14)
+    dr.text((MX, 16), "Private space each side, and the shared remainder",
+            font=f_t, fill=(18, 18, 18))
+    dr.text((MX + 2, 54),
+            "Blue = east private \u00b7 Amber = west private, including the vestibule behind its door "
+            "\u00b7 Grey stripes = shared, divided equally.",
+            font=f_ss, fill=(115, 115, 115))
+    y = H * S + TOP + 14
+    dr.rectangle([MX, y + 6, MX + 18, y + 24], fill=EAST_HUE)
+    dr.text((MX + 28, y + 4), f"east {east:.0f} sf", font=f_s, fill=(30, 30, 30))
+    dr.rectangle([MX + 190, y + 6, MX + 208, y + 24], fill=WEST_HUE)
+    dr.text((MX + 218, y + 4), f"west {west:.0f} sf", font=f_s, fill=(30, 30, 30))
+    dr.rectangle([MX + 390, y + 6, MX + 408, y + 24], fill=(120, 120, 120))
+    dr.text((MX + 418, y + 4), f"shared {shared:.0f} sf", font=f_s, fill=(30, 30, 30))
+    dr.text((MX, y + 40),
+            f"east share = ({east:.0f} + {shared / 2:.0f}) / {PUBLISHED_SF:,} = {share * 100:.2f}%",
+            font=f_n, fill=EAST_HUE)
     out.save(path)
     return path
 
@@ -394,4 +390,4 @@ if __name__ == "__main__":
 
     print()
     print("wrote", figure_areas(masks))
-    print("wrote", figure_vestibule(masks, envelope))
+    print("wrote", figure_split(masks, envelope))
