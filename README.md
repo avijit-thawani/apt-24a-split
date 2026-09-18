@@ -74,20 +74,30 @@ decides who absorbs that, not whether it happens.
 
 ## Could any other rule give 49.30%?
 
-`split.py` tests every reasonable definition of own-space against every
-reasonable treatment of the remainder:
+There are only **two** ways to treat the shared space: halve it, or allocate it
+in proportion to own space. "Ignore the shared space and split by own space
+alone" looks like a third, but it gives *identically* the pro-rata number — with
+`p = a/(a+l)` and `s = a+l`, so `a = ps`:
 
-| Own space defined as | Halve rest | Pro-rata | Ignore rest |
-|---|---|---|---|
-| bedrooms only | 47.84% | 42.57% | 42.57% |
-| bedrooms + closets | 47.42% | 42.87% | 42.87% |
-| **bedrooms + closets + baths** | **47.42%** | 44.19% | 44.19% |
+```
+(a + (T - s)·p) / T  =  (ps + (T - s)·p) / T  =  p·(s + T - s)/T  =  p
+```
 
-**No.** Every cell lands between 42.6% and 47.8%, so 49.30% is not a variation
-of this rule under any definition — it sits 1.9 points above all of them.
-Halving is the treatment closest to it; both alternatives move further away and
-always downward. To reach 49.30% under the rule, A would need 304 of the 570
-shared sf — 53% of the living room, kitchen and halls.
+Allocating the shared space in proportion to own space cannot change the ratio
+it is applied to, so the total drops out. `split.py` crosses the two real
+treatments with every reasonable definition of own-space:
+
+| Own space defined as | Halve rest | Pro-rata |
+|---|---|---|
+| bedrooms only | 47.84% | 42.57% |
+| bedrooms + closets | 47.42% | 42.87% |
+| **bedrooms + closets + baths** | **47.42%** | 44.19% |
+
+**No.** Every cell lands between 42.57% and 47.84%, so 49.30% is not a
+variation of this rule under any definition — it sits 1.5 points above all of
+them. Halving is the treatment closest to it; pro-rata moves away. To reach
+49.30% under the rule, A would need 304 of the 570 shared sf — 53% of the
+living room, kitchen and halls.
 
 ## Method
 

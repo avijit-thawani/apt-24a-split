@@ -37,17 +37,24 @@ def share(a_sf, l_sf, remainder="halve"):
     """A's share of the total.
 
     remainder:
-      "halve"    split the shared space equally (the rule above)
-      "pro-rata" allocate it in proportion to own space
-      "ignore"   do not count it at all
+      "halve"     split the shared space equally (the rule above)
+      "pro-rata"  allocate it in proportion to own space
+
+    There is no third option. "Ignore the shared space and split by own space
+    alone" looks like one, but it is the same number as pro-rata, identically:
+    with p = a/(a+l) and s = a+l, so a = ps,
+
+        (a + (T - s)p) / T  =  (ps + (T - s)p) / T  =  p(s + T - s)/T  =  p
+
+    Allocating the shared space in proportion to own space cannot change the
+    ratio it is applied to, so the total drops out. Verified to floating-point
+    noise over 10,000 random area pairs.
     """
     rest = TOTAL_SF - a_sf - l_sf
     if remainder == "halve":
         return (a_sf + rest / 2) / TOTAL_SF
     if remainder == "pro-rata":
         return (a_sf + rest * a_sf / (a_sf + l_sf)) / TOTAL_SF
-    if remainder == "ignore":
-        return a_sf / (a_sf + l_sf)
     raise ValueError(remainder)
 
 
@@ -100,21 +107,27 @@ def main():
          sf["A_bedroom"] + sf["A_closet"], sf["L_bedroom"] + sf["L_closet"]),
         ("bedrooms + closets + baths", a_own, l_own),
     ]
-    print(f"  {'own space defined as':<30}{'halve':>9}{'pro-rata':>10}{'ignore':>9}")
+    print("  There are only two ways to treat the shared space \u2014 halve it, or")
+    print("  allocate it in proportion to own space. (Splitting by own space alone")
+    print("  and ignoring the rest is not a third way: it is the same number as")
+    print("  pro-rata, identically. See share().)\n")
+    print(f"  {'own space defined as':<32}{'halve':>9}{'pro-rata':>11}")
     for name, a, l in defs:
-        print(f"  {name:<30}{share(a, l):>8.2%}{share(a, l, 'pro-rata'):>10.2%}"
-              f"{share(a, l, 'ignore'):>9.2%}")
+        print(f"  {name:<32}{share(a, l):>8.2%}{share(a, l, 'pro-rata'):>11.2%}")
 
     rest = TOTAL_SF - a_own - l_own
     needed = paid_pct * TOTAL_SF - a_own
-    print(f"\n  No. Halving the remainder is closest to {paid_pct:.2%} in every row; both")
-    print("  alternatives move further away, and both move DOWNWARD.")
+    lo = min(share(a, l, r) for _n, a, l in defs for r in ("halve", "pro-rata"))
+    hi = max(share(a, l, r) for _n, a, l in defs for r in ("halve", "pro-rata"))
+    print(f"\n  No. Every cell lands between {lo:.2%} and {hi:.2%}, so {paid_pct:.2%} is not a")
+    print(f"  variation of this rule under any definition \u2014 it sits "
+          f"{(paid_pct - hi) * 100:.1f} points above")
+    print("  all of them. Halving is the treatment closest to it; pro-rata moves away.")
     print(f"  To reach {paid_pct:.2%} under the rule, A would need {needed:.0f} of the {rest:.0f} sf")
     print(f"  of shared space \u2014 {needed / rest:.0%} of the living room, kitchen and halls.")
-    print(f"\n  Every row lands at 47.4\u201347.8%, so the {paid_pct:.2%} is not a variation of")
-    print("  this rule under any definition \u2014 it is 1.9 points above all of them.")
-    print("  The two bathrooms match to within 1 sf, so counting them changes nothing.")
-    print("  L's closet run is the larger of the two (40 vs 32 sf), so counting")
+    print("\n  The two bathrooms match to within 1 sf, so counting them changes nothing.")
+    print(f"  L's closet run is the larger of the two ({sf['L_closet']:.0f} vs "
+          f"{sf['A_closet']:.0f} sf), so counting")
     print("  closets lowers A's share slightly; they are counted.")
 
 
