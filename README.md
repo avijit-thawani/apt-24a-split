@@ -6,7 +6,7 @@ Reproducible — no area or share below was typed in by hand:
 
 ```
 python measure.py      # areas, scale checks, figures
-python split.py         # rent, shares, sensitivity
+python split.py        # rent, shares
 ```
 
 Needs `numpy` and `pillow`.
@@ -53,9 +53,6 @@ L's bathroom and the kitchen. A's are not. L's bedroom figure therefore
 includes the floor in front of L's bathroom, and L's closet is the whole run
 inside that door.
 
-Two details that work in A's favour and are counted anyway: the bathrooms match
-to within 1 sf, and **L's closet is the larger** of the two, 40 against 32.
-
 ## The result
 
 ![The split](./figures/split.png)
@@ -68,36 +65,8 @@ to within 1 sf, and **L's closet is the larger** of the two, 40 against 32.
 A is paying **$127/month more than the rule gives**; carrying 49.30% into the
 renewal rather than recalculating makes that **$135/month, $1,620 a year**.
 
-This is not a claim that A's rent should fall — at 47.42% A still pays **$200
-more** on renewal than today, because the apartment itself rose $422. The split
-decides who absorbs that, not whether it happens.
-
-## Could any other rule give 49.30%?
-
-There are only **two** ways to treat the shared space: halve it, or allocate it
-in proportion to own space. "Ignore the shared space and split by own space
-alone" looks like a third, but it gives *identically* the pro-rata number — with
-`p = a/(a+l)` and `s = a+l`, so `a = ps`:
-
-```
-(a + (T - s)·p) / T  =  (ps + (T - s)·p) / T  =  p·(s + T - s)/T  =  p
-```
-
-Allocating the shared space in proportion to own space cannot change the ratio
-it is applied to, so the total drops out. `split.py` crosses the two real
-treatments with every reasonable definition of own-space:
-
-| Own space defined as | Halve rest | Pro-rata |
-|---|---|---|
-| bedrooms only | 47.84% | 42.57% |
-| bedrooms + closets | 47.42% | 42.87% |
-| **bedrooms + closets + baths** | **47.42%** | 44.19% |
-
-**No.** Every cell lands between 42.57% and 47.84%, so 49.30% is not a
-variation of this rule under any definition — it sits 1.5 points above all of
-them. Halving is the treatment closest to it; pro-rata moves away. To reach
-49.30% under the rule, A would need 304 of the 570 shared sf — 53% of the
-living room, kitchen and halls.
+**This is area only.** It does not yet represent that the master bedroom, L's,
+has a south-facing window and an in-bedroom bathroom.
 
 ## Method
 

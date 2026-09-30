@@ -4,7 +4,7 @@
 
 Prints every area and writes the figures. Nothing is hand-entered.
 
-The two sides are A (east, blue) and L (west, orange). Each has a bedroom, a
+The two sides are A (blue) and L (orange). Each has a bedroom, a
 closet and a bathroom. The only structural difference between them: a door
 between L's bathroom and the kitchen, so L's bedroom, closet and bathroom are
 all behind one door, and A's are not.
@@ -133,8 +133,8 @@ def _box(shape, x0, y0, x1, y1):
 
 def check_scale():
     return {
-        "living room, east-west": (498 - 335, 15.25),
-        "living room, north-south": (262 - 100, 15.0),
+        "living room, horizontal": (498 - 335, 15.25),
+        "living room, vertical": (262 - 100, 15.0),
     }
 
 
