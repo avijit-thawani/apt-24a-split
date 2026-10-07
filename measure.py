@@ -309,7 +309,8 @@ def figure_split(masks, envelope, path="figures/split.png"):
     dr.rectangle([MX + 330, y + 6, MX + 348, y + 24], fill=(120, 120, 120))
     dr.text((MX + 358, y + 4), f"shared {shared:.0f} sf", font=f_s, fill=(30, 30, 30))
     dr.text((MX, y + 40),
-            f"A's share = ({a_tot:.0f} + {shared / 2:.0f}) / {PUBLISHED_SF:,} = {share * 100:.2f}%",
+            f"A's share of base rent = ({a_tot:.0f} + {shared / 2:.0f}) / {PUBLISHED_SF:,} = "
+            f"{share * 100:.2f}%",
             font=f_n, fill=A_HUE)
     out.save(path)
     return path

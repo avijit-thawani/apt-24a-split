@@ -13,6 +13,10 @@ Each side pays for the space only they use, plus half the space both use:
 
 "Own" means behind a door only one side passes through. L's bedroom, closet
 and bathroom are all behind one door. A's are not.
+
+The share applies to the base rent only. Amenities, internet and liability are
+split 50:50, and so are the metered utilities, which are billed on top and are
+not in the totals here.
 """
 
 import measure
@@ -32,9 +36,14 @@ L_KEYS = measure.L_KEYS
 
 
 def share(a_sf, l_sf):
-    """A's share of the total."""
+    """A's share of the base rent."""
     rest = TOTAL_SF - a_sf - l_sf
     return (a_sf + rest / 2) / TOTAL_SF
+
+
+def a_parts(charges, base_share):
+    """A's part of each charge: base_share of the base rent, half of the rest."""
+    return {k: v * (base_share if k == "base" else 0.5) for k, v in charges.items()}
 
 
 def main():
@@ -64,17 +73,29 @@ def main():
     print(f"  shared                {TOTAL_SF - a_own - l_own:7.1f} sf")
     print(f"  total (published)     {TOTAL_SF:7.1f} sf\n")
 
-    print("SHARE OF THE RENT")
-    print(f"  {'':<24}{'share':>8}{'today':>9}{'renewal':>10}")
-    for name, pc in (("as paid today", paid_pct), ("by the rule", by_rule)):
-        print(f"  {name:<24}{pc:>7.2%}{CURRENT_TOTAL * pc:>9,.0f}{RENEWAL_TOTAL * pc:>10,.0f}")
-    d_today = CURRENT_TOTAL * by_rule - PAID_A
-    d_renew = RENEWAL_TOTAL * by_rule - RENEWAL_TOTAL * paid_pct
+    renew = a_parts(RENEWAL, by_rule)
+    rule_today = sum(a_parts(CURRENT, by_rule).values())
+    rule_renew = sum(renew.values())
+    hold_renew = RENEWAL_TOTAL * paid_pct
+
+    print("SHARE OF THE RENT \u2014 base rent by area, everything else 50:50")
+    print(f"  {'on renewal':<22}{'A share':>9}{'total':>9}{'A':>8}{'L':>8}")
+    for k, v in RENEWAL.items():
+        a = renew[k]
+        print(f"  {k:<22}{a / v:>9.2%}{v:>9,}{a:>8,.0f}{v - a:>8,.0f}")
+    print(f"  {'TOTAL':<22}{'':>9}{RENEWAL_TOTAL:>9,}{rule_renew:>8,.0f}"
+          f"{RENEWAL_TOTAL - rule_renew:>8,.0f}")
+
+    print(f"\n  {'A pays':<24}{'today':>9}{'renewal':>10}")
+    print(f"  {'as paid today, ' + format(paid_pct, '.2%'):<24}{PAID_A:>9,}{hold_renew:>10,.0f}")
+    print(f"  {'by the rule':<24}{rule_today:>9,.0f}{rule_renew:>10,.0f}")
+    d_today = rule_today - PAID_A
+    d_renew = rule_renew - hold_renew
     print(f"\n  vs what A pays now                {d_today:>+9,.0f}")
     print(f"  on renewal, vs holding {paid_pct:.2%}   {d_renew:>+9,.0f}"
           f"   ({d_renew * 12:+,.0f}/year)")
-    print("\n  This is area only. It does not yet represent that the master bedroom,")
-    print("  L's, has a south-facing window and an in-bedroom bathroom.")
+    print("\n  The base-rent split is area only. It does not yet represent that the")
+    print("  master bedroom, L's, has a south-facing window and an in-bedroom bathroom.")
 
 
 if __name__ == "__main__":
