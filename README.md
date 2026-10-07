@@ -1,8 +1,14 @@
 # Apartment 24A — floor areas and rent split
 
+| On renewal | Total | A | L |
+|---|---|---|---|
+| Base rent, split 47.42 / 52.58 | $6,881 | $3,263 | $3,618 |
+| Amenities, internet and liability, split 50:50 | $302 | $151 | $151 |
+| **Total** | **$7,183** | **$3,414** | **$3,769** |
+
 Each side's share of the rent, from floor areas measured off the published plan
 rather than estimated. The two sides are **A** (blue) and **L** (orange).
-Reproducible — no area or share below was typed in by hand:
+Reproducible — no area or share in this README was typed in by hand:
 
 ```
 python measure.py      # areas, scale checks, figures
@@ -23,7 +29,7 @@ share = (own area + shared area / 2) / total area
 
 The share applies to the base rent only. Amenities, internet and liability are
 split 50:50, and so are the metered utilities (electricity, gas, water, sewer),
-which are billed on top and aren't in the totals below.
+which are billed on top and aren't in any of the totals here.
 
 ## The rent
 
@@ -65,13 +71,6 @@ inside that door.
 |---|---|---|
 | As paid today, 49.30% of the total | $3,333 | $3,541 |
 | **By the rule** | **$3,213** | **$3,414** |
-
-By the rule on renewal, A pays 47.42% of the $6,881 base rent plus half of the
-$302 in other charges: $3,263 + $151 = **$3,414**. L pays $3,618 + $151 =
-**$3,769**.
-
-A is paying **$120/month more than the rule gives**; carrying 49.30% into the
-renewal rather than recalculating makes that **$127/month, $1,527 a year**.
 
 **The base-rent split is area only.** It does not yet represent that the master
 bedroom, L's, has a south-facing window and an in-bedroom bathroom.

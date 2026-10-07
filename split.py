@@ -89,11 +89,6 @@ def main():
     print(f"\n  {'A pays':<24}{'today':>9}{'renewal':>10}")
     print(f"  {'as paid today, ' + format(paid_pct, '.2%'):<24}{PAID_A:>9,}{hold_renew:>10,.0f}")
     print(f"  {'by the rule':<24}{rule_today:>9,.0f}{rule_renew:>10,.0f}")
-    d_today = rule_today - PAID_A
-    d_renew = rule_renew - hold_renew
-    print(f"\n  vs what A pays now                {d_today:>+9,.0f}")
-    print(f"  on renewal, vs holding {paid_pct:.2%}   {d_renew:>+9,.0f}"
-          f"   ({d_renew * 12:+,.0f}/year)")
     print("\n  The base-rent split is area only. It does not yet represent that the")
     print("  master bedroom, L's, has a south-facing window and an in-bedroom bathroom.")
 
